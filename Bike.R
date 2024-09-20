@@ -4,6 +4,7 @@ library(skimr)
 library(DataExplorer)
 library(patchwork)
 library(ggplot2)
+library(tidymodels)
 
 # Reading in data 
 train <- vroom::vroom("train.csv")
@@ -15,6 +16,8 @@ train |>
 
 # Factorizing categorical variables
 train <- train |> 
+  mutate(across(c(season, holiday, workingday, weather), as.factor))
+test <- test |> 
   mutate(across(c(season, holiday, workingday, weather), as.factor))
 
 # Overview of the dataset says there is no missing data 
@@ -92,3 +95,27 @@ casual_work + registered_work
 
 # Casual vs. Registered Holiday and Working Day
 (casual_holiday + registered_holiday)/ (casual_work + registered_work)
+
+
+
+
+# Linear regression without transforming season data 
+linear_factor <- linear_reg() |> 
+  set_engine("lm") |> 
+  set_mode("regression")  |> # dealing w quant target
+  fit(formula = count ~ windspeed + humidity + atemp + temp + weather + workingday + holiday + season, data = train)
+
+bike_predictions <- predict(linear_factor, new_data = test) # use fit to predict
+
+# Look at output
+bike_predictions
+
+# Format predictions for submission to kaggle
+kaggle_submissions <- bike_predictions |> 
+
+# Write out file using vroom
+  
+
+
+# Linear regression with transforming season data 
+
